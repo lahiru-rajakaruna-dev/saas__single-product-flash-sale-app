@@ -18,7 +18,13 @@ import { table_app_wallet } from './app_wallet';
 
 
 
-export const transaction_flow = [ 'DEBIT', 'CREDIT' ] as const
+export const transaction_flow            = [ 'DEBIT', 'CREDIT' ] as const
+export const app_wallet_transaction_type = [
+	'USER_WALLET_WITHDRAW',
+	'ADMIN_WITHDRAW',
+	'USER_SALE_COMMISSION',
+	'USER_SUBSCRIPTION'
+] as const
 
 export const table_app_wallet_transactions = pgTable(
 	'app_wallets_transactions',
@@ -28,6 +34,8 @@ export const table_app_wallet_transactions = pgTable(
 		transaction_absolute_value        : decimal({ mode: 'number' })
 			.notNull(),
 		transaction_flow                  : text({ enum: transaction_flow })
+			.notNull(),
+		transaction_type                  : text({ enum: app_wallet_transaction_type })
 			.notNull(),
 		transaction_running_wallet_balance: decimal({ mode: 'number' })
 			.notNull(),
