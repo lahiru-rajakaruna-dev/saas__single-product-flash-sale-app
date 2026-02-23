@@ -50,7 +50,7 @@ export const table_users_wallets_transactions = pgTable(
 	(table) => {
 		return {
 			pk                         : primaryKey({
-														name   : 'transaction_primary_key',
+														name   : 'user_wallet_transaction_primary_key',
 														columns: [ table.transaction_id ]
 													}),
 			transaction_wallet_id_fk   : foreignKey({
