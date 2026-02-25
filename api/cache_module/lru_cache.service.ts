@@ -1,14 +1,13 @@
-import {LRUCache}         from "lru-cache";
-import {ILoggerService}   from "../logger_module/logger.interface";
-import {BaseCacheService} from "./abstract_cache.service";
-import {ICacheService}    from "./cache.interface";
+import {LRUCache}             from "lru-cache";
+import {LoggerServiceFactory} from "../logger_module/logger.factory";
+import {BaseCacheService}     from "./abstract_cache.service";
+import {ICacheService}        from "./cache.interface";
 
 export class LRUCacheService extends BaseCacheService {
     private readonly lru_cache: LRUCache<string, Record<string, any>>
 
     private constructor() {
-        // TODO ADD LOGGER
-        super({} as ILoggerService)
+        super(LoggerServiceFactory.getLogger())
 
         const cache_ttl = process.env.CACHE_TTL ? parseInt(process.env.CACHE_TTL) : BaseCacheService.DEFAULT_TTL
         this.lru_cache  = new LRUCache<string, Record<string, any>>({

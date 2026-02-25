@@ -1,9 +1,10 @@
-import * as dotenv                    from 'dotenv'
-import NodeCache                      from 'node-cache';
-import path                           from 'node:path';
-import {ILoggerService}               from "../logger_module/logger.interface";
-import {BaseCacheService, ISingleton} from './abstract_cache.service';
-import {ICacheService}                from "./cache.interface";
+import * as dotenv            from 'dotenv'
+import NodeCache              from 'node-cache';
+import path                   from 'node:path';
+import {LoggerServiceFactory} from "../logger_module/logger.factory";
+import {ILoggerService}       from "../logger_module/logger.interface";
+import {BaseCacheService,}    from './abstract_cache.service';
+import {ICacheService}        from "./cache.interface";
 
 
 dotenv.config({
@@ -19,8 +20,7 @@ export class NodeCacheService extends BaseCacheService {
 
 
     private constructor() {
-        // TODO ADD LOGGER FACTORY HERE
-        super({} as ILoggerService)
+        super(LoggerServiceFactory.getLogger())
 
         const cache_ttl = process.env.CACHE_TTLE
             ? parseInt(process.env.CACHE_TTL as string)
