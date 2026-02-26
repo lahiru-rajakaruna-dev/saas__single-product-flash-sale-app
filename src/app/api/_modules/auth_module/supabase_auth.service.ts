@@ -2,10 +2,11 @@ import {BaseAuthService}              from "@/app/api/_modules/auth_module/abstr
 import {LoggerServiceFactory}         from "@/app/api/_modules/logger_module/logger.factory";
 import {createClient, SupabaseClient} from "@supabase/supabase-js";
 
-import * as dotenv      from 'dotenv'
-import {NextApiRequest} from "next";
-import {NextResponse}   from "next/server";
-import path             from "node:path";
+import * as dotenv                 from 'dotenv'
+import {NextApiRequest}            from "next";
+import {cookies}                   from "next/headers";
+import {NextRequest, NextResponse} from "next/server";
+import path                        from "node:path";
 
 
 
@@ -38,8 +39,9 @@ export class SupabaseAuthService extends BaseAuthService {
 	}
 
 
-	authorizeRequest(request: NextApiRequest): NextResponse {
-		const body: BodyInit = JSON.stringify({})
-		return new NextResponse(body);
+	authorizeRequest(request: Request): boolean {
+		const parsedReq = new NextRequest(new URL(request.url), request)
+
+		return true;
 	}
 }

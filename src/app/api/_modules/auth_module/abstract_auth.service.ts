@@ -13,7 +13,7 @@ export abstract class BaseAuthService implements IAuthService {
 		this.logger = logger
 	}
 
-	abstract authorizeRequest(request: NextApiRequest): NextResponse
+	abstract authorizeRequest(request: Request): boolean
 
 
 }
