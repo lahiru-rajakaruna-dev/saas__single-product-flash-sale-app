@@ -26,28 +26,51 @@ export interface IOrmService {
 
 	deleteUserById(id: string): Promise<boolean>
 
-	getProductById(id: string): Promise<TSelectProduct | undefined>
+	getProductById(
+		userID: string,
+		id: string
+	): Promise<TSelectProduct | undefined>
 
 	getProductsByUserId(userId: string): Promise<TSelectProduct[]>
 
-	createProduct(product: TInsertProduct): Promise<TSelectProduct>
+	createProduct(
+		userID: string,
+		product: TInsertProduct
+	): Promise<TSelectProduct>
 
 	updateProductById(
+		userID: string,
 		id: string,
 		productUpdates: TUpdateProduct
 	): Promise<TSelectProduct>
 
-	deleteProductById(id: string): Promise<boolean>
+	deleteProductById(
+		userID: string,
+		id: string
+	): Promise<boolean>
 
-	getPageById(id: string): Promise<TSelectPage | undefined>
+	getPageById(
+		userID: string,
+		id: string
+	): Promise<TSelectPage | undefined>
 
 	getPagesByUserId(userId: string): Promise<TSelectPage[]>
 
-	createPage(page: TInsertPage): Promise<TSelectPage>
+	createPage(
+		userID: string,
+		page: TInsertPage
+	): Promise<TSelectPage>
 
-	updatePageById(id: string, pageUpdates: TUpdatePage): Promise<TSelectPage>
+	updatePageById(
+		userID: string,
+		id: string,
+		pageUpdates: TUpdatePage
+	): Promise<TSelectPage>
 
-	deletePageById(id: string): Promise<boolean>
+	deletePageById(
+		userID: string,
+		id: string
+	): Promise<boolean>
 
 }
 

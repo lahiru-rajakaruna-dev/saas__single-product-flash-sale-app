@@ -65,11 +65,14 @@ export class DrizzleOrmService extends BaseOrmService {
 		return this.instance
 	}
 
-	async createPage(page: TInsertPage): Promise<TSelectPage> {
+	async createPage(
+		userID: string,
+		page: TInsertPage
+	): Promise<TSelectPage> {
 		try {
 			const result = await this.drizzle_driver.insert(table_pages)
 									 .values({...page, page_owner_id: userID})
-				page).returning()
+									 .returning()
 			return this.logger.logAndReturn(
 				result[0],
 				'operation: create_page'
@@ -83,10 +86,16 @@ export class DrizzleOrmService extends BaseOrmService {
 		}
 	}
 
-	async createProduct(product: TInsertProduct): Promise<TSelectProduct> {
+	async createProduct(
+		userID: string,
+		product: TInsertProduct
+	): Promise<TSelectProduct> {
 		try {
 			const result = await this.drizzle_driver.insert(table_products)
-									 .values(product)
+									 .values({
+												 ...product,
+												 product_owner_id: userID
+											 })
 									 .returning()
 			return this.logger.logAndReturn(
 				result[0],
@@ -119,66 +128,126 @@ export class DrizzleOrmService extends BaseOrmService {
 		}
 	}
 
-	async deletePageById(id: string): Promise<boolean> {
+	async deletePageById(
+		userID: string,
+		id: string
+	): Promise<boolean> {
 		try {
-			const result = await this.drizzle_driver.delete(table_pages).where(
-				eq(table_pages.page_id, id)).returning()
-			this.logger.log(JSON.stringify(result[0]))
-			return true
-		} catch (e) {
-			throw new OrmError((e as Error).message, 'delete_user', {id: id})
-		}
-	}
-
-	async deleteProductById(id: string): Promise<boolean> {
-		try {
-			const result = await this.drizzle_driver.delete(table_products)
+			const result = await this.drizzle_driver.delete(table_pages)
 									 .where(
-										 eq(table_products.product_id, id))
+										 and(
+											 eq(
+												 table_pages.page_id,
+												 id
+											 ),
+											 eq(
+												 table_pages.page_owner_id,
+												 userID
+											 )
+										 ))
 									 .returning()
 			this.logger.log(JSON.stringify(result[0]))
 			return true
 		} catch (e) {
-			throw new OrmError((e as Error).message, 'delete_product', {id: id})
+			throw new OrmError(
+				(e as Error).message,
+				'delete_user',
+				{id: id}
+			)
+		}
+	}
+
+	async deleteProductById(
+		userID: string,
+		id: string
+	): Promise<boolean> {
+		try {
+			const result = await this.drizzle_driver.delete(table_products)
+									 .where(
+										 and(
+											 eq(
+												 table_products.product_id,
+												 id
+											 ),
+											 eq(
+												 table_products.product_owner_id,
+												 userID
+											 )
+										 ))
+									 .returning()
+			this.logger.log(JSON.stringify(result[0]))
+			return true
+		} catch (e) {
+			throw new OrmError(
+				(e as Error).message,
+				'delete_product',
+				{id: id}
+			)
 		}
 	}
 
 	async deleteUserById(id: string): Promise<boolean> {
 		try {
 			const result = await this.drizzle_driver.delete(table_users)
-									 .where(
-										 eq(table_users.user_id, id))
+									 .where(eq(
+										 table_users.user_id,
+										 id
+									 ))
 									 .returning()
 			this.logger.log(JSON.stringify(result[0]))
 			return true
 		} catch (e) {
-			throw new OrmError((e as Error).message, 'delete_user', {id: id})
+			throw new OrmError(
+				(e as Error).message,
+				'delete_user',
+				{id: id}
+			)
 		}
 	}
 
-	async getPageById(id: string): Promise<TSelectPage | undefined> {
+	async getPageById(
+		userID: string,
+		id: string
+	): Promise<TSelectPage | undefined> {
 		try {
-			const result = await this.drizzle_driver.query.table_pages.findFirst(
-				{
-					where(columns) {
-						return eq(columns.page_id, id)
-					}
-				})
+			const result = await this.drizzle_driver.query.table_pages.findFirst({
+																					 where(columns) {
+																						 return and(
+																							 eq(
+																								 columns.page_owner_id,
+																								 userID
+																							 ),
+																							 eq(
+																								 columns.page_id,
+																								 id
+																							 )
+																						 )
+																					 }
+																				 })
 
-			return this.logger.logAndReturn(result, 'operation: get_page_by_id')
+			return this.logger.logAndReturn(
+				result,
+				'operation: get_page_by_id'
+			)
 		} catch (e) {
-			throw new OrmError((e as Error).message, 'get_page_by_id', {id: id})
+			throw new OrmError(
+				(e as Error).message,
+				'get_page_by_id',
+				{id: id}
+			)
 		}
 	}
 
 	async getPagesByUserId(userId: string): Promise<TSelectPage[]> {
 		try {
-			const result = await this.drizzle_driver.query.table_pages.findMany(
-				{
-					where(columns) {
-						return eq(columns.page_owner_id, userId)
-					}
-				})
+			const result = await this.drizzle_driver.query.table_pages.findMany({
+																					where(columns) {
+																						return eq(
+																							columns.page_owner_id,
+																							userId
+																						)
+																					}
+																				})
 
 			return this.logger.logAndReturn(
 				result,
@@ -193,14 +262,25 @@ export class DrizzleOrmService extends BaseOrmService {
 		}
 	}
 
-	async getProductById(id: string): Promise<TSelectProduct | undefined> {
+	async getProductById(
+		userID: string,
+		id: string
+	): Promise<TSelectProduct | undefined> {
 		try {
-			const result = await this.drizzle_driver.query.table_products.findFirst(
-				{
-					where(columns) {
-						return eq(columns.product_id, id)
-					}
-				})
+			const result = await this.drizzle_driver.query.table_products.findFirst({
+																						where(columns) {
+																							return and(
+																								eq(
+																									columns.product_owner_id,
+																									userID
+																								),
+																								eq(
+																									columns.product_id,
+																									id
+																								)
+																							)
+																						}
+																					})
 
 			return this.logger.logAndReturn(
 				result,
@@ -217,12 +297,14 @@ export class DrizzleOrmService extends BaseOrmService {
 
 	async getProductsByUserId(userId: string): Promise<TSelectProduct[]> {
 		try {
-			const result = await this.drizzle_driver.query.table_products.findMany(
-				{
-					where(columns) {
-						return eq(columns.product_owner_id, userId)
-					}
-				})
+			const result = await this.drizzle_driver.query.table_products.findMany({
+																					   where(columns) {
+																						   return eq(
+																							   columns.product_owner_id,
+																							   userId
+																						   )
+																					   }
+																				   })
 
 			return this.logger.logAndReturn(
 				result,
@@ -239,15 +321,24 @@ export class DrizzleOrmService extends BaseOrmService {
 
 	async getUserById(id: string): Promise<TSelectUser | undefined> {
 		try {
-			const result = await this.drizzle_driver.query.table_users.findFirst(
-				{
-					where(columns) {
-						return eq(columns.user_id, id)
-					}
-				})
-			return this.logger.logAndReturn(result, 'operation: get_user_by_id')
+			const result = await this.drizzle_driver.query.table_users.findFirst({
+																					 where(columns) {
+																						 return eq(
+																							 columns.user_id,
+																							 id
+																						 )
+																					 }
+																				 })
+			return this.logger.logAndReturn(
+				result,
+				'operation: get_user_by_id'
+			)
 		} catch (e) {
-			throw new OrmError((e as Error).message, 'get_user_by_id', {id: id})
+			throw new OrmError(
+				(e as Error).message,
+				'get_user_by_id',
+				{id: id}
+			)
 		}
 	}
 
@@ -256,20 +347,37 @@ export class DrizzleOrmService extends BaseOrmService {
 			const result = await this.drizzle_driver.query.table_users
 									 .findMany()
 
-			return this.logger.logAndReturn(result, 'get_users')
+			return this.logger.logAndReturn(
+				result,
+				'get_users'
+			)
 		} catch (e) {
-			throw new OrmError((e as Error).message, 'get_users')
+			throw new OrmError(
+				(e as Error).message,
+				'get_users'
+			)
 		}
 	}
 
 	async updatePageById(
+		userID: string,
 		id: string,
 		pageUpdates: TUpdatePage
 	): Promise<TSelectPage> {
 		try {
 			const result = await this.drizzle_driver.update(table_pages)
 									 .set(pageUpdates)
-									 .where(eq(table_pages.page_id, id))
+									 .where(
+										 and(
+											 eq(
+												 table_pages.page_id,
+												 id
+											 ),
+											 eq(
+												 table_pages.page_owner_id,
+												 userID
+											 )
+										 ))
 									 .returning()
 
 			return this.logger.logAndReturn(
@@ -286,13 +394,24 @@ export class DrizzleOrmService extends BaseOrmService {
 	}
 
 	async updateProductById(
+		userID: string,
 		id: string,
 		productUpdates: TUpdateProduct
 	): Promise<TSelectProduct> {
 		try {
 			const result = await this.drizzle_driver.update(table_products)
 									 .set(productUpdates)
-									 .where(eq(table_products.product_id, id))
+									 .where(
+										 and(
+											 eq(
+												 table_products.product_id,
+												 id
+											 ),
+											 eq(
+												 table_products.product_owner_id,
+												 userID
+											 )
+										 ))
 									 .returning()
 
 			return this.logger.logAndReturn(
@@ -315,7 +434,10 @@ export class DrizzleOrmService extends BaseOrmService {
 		try {
 			const result = await this.drizzle_driver.update(table_users)
 									 .set(userUpdates)
-									 .where(eq(table_users.user_id, id))
+									 .where(eq(
+										 table_users.user_id,
+										 id
+									 ))
 									 .returning()
 
 			return this.logger.logAndReturn(

@@ -22,23 +22,41 @@ export abstract class BaseOrmService implements IOrmService {
 		this.logger = logger
 	}
 
-	abstract createPage(page: TInsertPage): Promise<TSelectPage>
+	abstract createPage(
+		userID: string,
+		page: TInsertPage
+	): Promise<TSelectPage>
 
-	abstract createProduct(product: TInsertProduct): Promise<TSelectProduct>
+	abstract createProduct(
+		userID: string,
+		product: TInsertProduct
+	): Promise<TSelectProduct>
 
 	abstract createUser(user: TInsertUser): Promise<TSelectUser>
 
-	abstract deletePageById(id: string): Promise<boolean>
+	abstract deletePageById(
+		userID: string,
+		id: string
+	): Promise<boolean>
 
-	abstract deleteProductById(id: string): Promise<boolean>
+	abstract deleteProductById(
+		userID: string,
+		id: string
+	): Promise<boolean>
 
 	abstract deleteUserById(id: string): Promise<boolean>
 
-	abstract getPageById(id: string): Promise<TSelectPage | undefined>
+	abstract getPageById(
+		userID: string,
+		id: string
+	): Promise<TSelectPage | undefined>
 
 	abstract getPagesByUserId(userId: string): Promise<TSelectPage[]>
 
-	abstract getProductById(id: string): Promise<TSelectProduct | undefined>
+	abstract getProductById(
+		userID: string,
+		id: string
+	): Promise<TSelectProduct | undefined>
 
 	abstract getProductsByUserId(userId: string): Promise<TSelectProduct[]>
 
@@ -47,11 +65,13 @@ export abstract class BaseOrmService implements IOrmService {
 	abstract getUsers(): Promise<TSelectUser[]>
 
 	abstract updatePageById(
+		userID: string,
 		id: string,
 		pageUpdates: TUpdatePage
 	): Promise<TSelectPage>
 
 	abstract updateProductById(
+		userID: string,
 		id: string,
 		productUpdates: TUpdateProduct
 	): Promise<TSelectProduct>
@@ -60,6 +80,5 @@ export abstract class BaseOrmService implements IOrmService {
 		id: string,
 		userUpdates: TUpdateUser
 	): Promise<TSelectUser>
-
 
 }
