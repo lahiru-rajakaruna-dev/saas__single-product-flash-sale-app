@@ -5,40 +5,24 @@ import {IOrmService}    from "@/app/api/_modules/orm_module/orm.interface";
 
 export class BaseRepository<TOrmDriver> {
 
-	protected readonly logger: ILoggerService;
-	protected readonly orm: IOrmService
+	private readonly _logger: ILoggerService;
+	private readonly _orm: IOrmService<TOrmDriver>
 
 	protected constructor(
 		logger: ILoggerService,
-		orm: IOrmService
+		orm: IOrmService<TOrmDriver>
 	) {
-		this.logger = logger
-		this.orm    = orm
+		this._logger = logger
+		this._orm    = orm
 	}
 
-	abstract deleteOne(
-		userID: string,
-		id: string
-	): Promise<boolean>
+	get logger(): ILoggerService {
+		return this._logger
+	}
 
-	abstract createOne(
-		userID: string,
-		data: TInsert
-	): Promise<TSelect>
-
-	abstract getAll(userID: string): Promise<TSelect[]>
-
-	abstract getOne(
-		userID: string,
-		id: string
-	): Promise<TSelect | undefined>
-
-	abstract updateOne(
-		userID: string,
-		id: string,
-		updates: TUpdate
-	): Promise<TSelect | undefined>
-
+	get orm(): IOrmService<TOrmDriver> {
+		return this._orm
+	}
 }
 
 
