@@ -24,7 +24,7 @@ dotenv.config({
 
 
 export class OrmServiceFactory {
-	public static async getService(): Promise<IOrmService> {
+	public static async getService() {
 		const ormOption = process.env.ORM_PROVIDER
 
 		switch (ormOption) {
