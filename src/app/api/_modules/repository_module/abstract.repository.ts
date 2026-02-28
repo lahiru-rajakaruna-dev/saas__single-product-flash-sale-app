@@ -1,11 +1,9 @@
 import {ILoggerService} from "@/app/api/_modules/logger_module/logger.interface";
 import {IOrmService}    from "@/app/api/_modules/orm_module/orm.interface";
-import {IRepository}    from "@/app/api/_modules/repository_module/repository.interface";
 
 
 
-export abstract class BaseRepository<TSelect, TUpdate, TInsert>
-	implements IRepository<TSelect, TUpdate, TInsert> {
+export class BaseRepository<TOrmDriver> {
 
 	protected readonly logger: ILoggerService;
 	protected readonly orm: IOrmService
