@@ -1,4 +1,5 @@
 import {BaseOrmService} from "@/app/api/_modules/orm_module/abstract.orm";
+import {IOrmService}    from "@/app/api/_modules/orm_module/orm.interface";
 import * as schema      from "@drizzle/schema";
 
 import * as dotenv from 'dotenv'
@@ -38,7 +39,7 @@ export class DrizzleOrmService
 
 	}
 
-	public static async getInstance() {
+	public static async getInstance(): Promise<IOrmService<TDrizzleOrm>> {
 		if (!this.instance) {
 			const dbClient = new Client({
 											connectionString: process.env.DATABASE_URL,
