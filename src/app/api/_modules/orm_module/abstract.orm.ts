@@ -7,13 +7,12 @@ import {IOrmService}          from "@/app/api/_modules/orm_module/orm.interface"
 export abstract class BaseOrmService
 	implements IOrmService {
 	private readonly _logger: ILoggerService
-	private readonly _driver: TDriver;
+	protected abstract _driver: TDrizzleOrm;
 
 	protected constructor(
-		dbDriver: TDriver,
+		logger: ILoggerService
 	) {
-		this._logger = LoggerServiceFactory.getLogger()
-		this._driver = dbDriver
+		this._logger = logger
 	}
 
 	get driver(): TDriver {
