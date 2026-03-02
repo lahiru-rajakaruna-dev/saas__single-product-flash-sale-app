@@ -1,3 +1,4 @@
+import {BaseOrmService}    from "@/app/api/_modules/orm_module/abstract.orm";
 import {DrizzleOrmService} from "@/app/api/_modules/orm_module/drizzle.orm";
 import {
 	IOrmService,
@@ -24,7 +25,7 @@ dotenv.config({
 
 
 export class OrmServiceFactory {
-	public static async getService() {
+	public static async getService(): Promise<BaseOrmService> {
 		const ormOption = process.env.ORM_PROVIDER
 
 		switch (ormOption) {
