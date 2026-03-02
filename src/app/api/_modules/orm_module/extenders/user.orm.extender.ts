@@ -1,31 +1,30 @@
 import {BaseOrmService} from "@/app/api/_modules/orm_module/abstract.orm";
-import {
-	OrmError,
-	TDrizzleOrm
-}                       from "@/app/api/_modules/orm_module/drizzle.orm";
+import {OrmError} from "@/app/api/_modules/orm_module/drizzle.orm";
+import {IOrmUserManagable} from "@/app/api/_modules/orm_module/orm.interface";
 import {
 	table_users,
 	TInsertUser,
 	TSelectUser,
 	TUpdateUser
-}                       from "@drizzle/schema";
-import {eq}             from "drizzle-orm";
+} from "@drizzle/schema";
+import {eq} from "drizzle-orm";
 
 
 
-export class UserExtendedOrm {
-	private readonly base_orm: BaseOrmService<TDrizzleOrm>;
+export class UserExtendedOrm implements IOrmUserManagable {
+	private readonly orm: BaseOrmService
 
-	public constructor(baseOrm: BaseOrmService<TDrizzleOrm>) {
-		this.base_orm = baseOrm
+	public constructor(orm: BaseOrmService) {
+		this.orm = orm
 	}
 
-	async createUser(user: TInsertUser): Promise<TSelectUser> {
+	async createUser(data: TInsertUser): Promise<TSelectUser> {
 		try {
-			const result = await this.base_orm.driver.insert(table_users)
-									 .values(user)
+			const result = await this.orm.driver.insert(table_users)
+									 .values(data)
 									 .returning()
-			return this.base_orm.logger.logAndReturn(
+
+			return this.orm.logger.logAndReturn(
 				result[0],
 				'operation: create_user'
 			);
@@ -33,22 +32,27 @@ export class UserExtendedOrm {
 			throw new OrmError(
 				(e as Error).message,
 				'create_user',
-				{data: user}
+				{data: data}
 			)
 		}
 	}
 
-	async getUserById(id: string): Promise<TSelectUser | undefined> {
+	async getUser(userID: string): Promise<TSelectUser | undefined> {
 		try {
-			const result = await this.base_orm.driver.query.table_users.findFirst({
-																					  where(columns) {
-																						  return eq(
-																							  columns.user_id,
-																							  id
-																						  )
-																					  }
-																				  })
-			return this.base_orm.logger.logAndReturn(
+			const result = await this.orm
+									 .driver
+									 .query
+									 .table_users
+									 .findFirst({
+													where(columns) {
+														return eq(
+															columns.user_id,
+															userID
+														)
+													}
+												})
+
+			return this.orm.logger.logAndReturn(
 				result,
 				'operation: get_user_by_id'
 			)
@@ -56,42 +60,33 @@ export class UserExtendedOrm {
 			throw new OrmError(
 				(e as Error).message,
 				'get_user_by_id',
-				{id: id}
+				{id: userID}
 			)
 		}
 	}
 
 	async getUsers(): Promise<TSelectUser[]> {
 		try {
-			const result = await this.base_orm.driver.query.table_users
+			const result = await this.orm.driver.query.table_users
 									 .findMany()
 
-			return this.base_orm.logger.logAndReturn(
-				result,
-				'get_users'
-			)
+			return this.orm.logger.logAndReturn(result, 'get_users')
 		} catch (e) {
-			throw new OrmError(
-				(e as Error).message,
-				'get_users'
-			)
+			throw new OrmError((e as Error).message, 'get_users')
 		}
 	}
 
-	async updateUserById(
+	async updateUser(
 		id: string,
 		userUpdates: TUpdateUser
 	): Promise<TSelectUser> {
 		try {
-			const result = await this.base_orm.driver.update(table_users)
+			const result = await this.orm.driver.update(table_users)
 									 .set(userUpdates)
-									 .where(eq(
-										 table_users.user_id,
-										 id
-									 ))
+									 .where(eq(table_users.user_id, id))
 									 .returning()
 
-			return this.base_orm.logger.logAndReturn(
+			return this.orm.logger.logAndReturn(
 				result[0],
 				'operation: update_user_by_id'
 			)
@@ -106,20 +101,15 @@ export class UserExtendedOrm {
 
 	async deleteUserById(id: string): Promise<boolean> {
 		try {
-			const result = await this.base_orm.driver.delete(table_users)
-									 .where(eq(
-										 table_users.user_id,
-										 id
-									 ))
+			const result = await this.orm.driver.delete(table_users)
+									 .where(eq(table_users.user_id, id))
 									 .returning()
-			this.base_orm.logger.log(JSON.stringify(result[0]))
+
+			this.orm.logger.log(JSON.stringify(result[0]))
+
 			return true
 		} catch (e) {
-			throw new OrmError(
-				(e as Error).message,
-				'delete_user',
-				{id: id}
-			)
+			throw new OrmError((e as Error).message, 'delete_user', {id: id})
 		}
 	}
 }
