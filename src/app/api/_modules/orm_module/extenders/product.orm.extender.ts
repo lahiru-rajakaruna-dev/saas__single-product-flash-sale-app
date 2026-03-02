@@ -1,38 +1,38 @@
-import {BaseOrmService} from "@/app/api/_modules/orm_module/abstract.orm";
+import {BaseOrmService}       from "@/app/api/_modules/orm_module/abstract.orm";
 import {
 	OrmError,
 	TDrizzleOrm
-}                       from "@/app/api/_modules/orm_module/drizzle.orm";
+}                             from "@/app/api/_modules/orm_module/drizzle.orm";
+import {IOrmProductManagable} from "@/app/api/_modules/orm_module/orm.interface";
 import {
 	table_products,
 	TInsertProduct,
 	TSelectProduct,
 	TUpdatePage
-}                       from "@drizzle/schema";
-import {eq}             from "drizzle-orm";
-import {and}            from "drizzle-orm/sql/expressions/conditions";
+}                             from "@drizzle/schema";
+import {eq}                   from "drizzle-orm";
+import {and}                  from "drizzle-orm/sql/expressions/conditions";
 
 
 
-export class ProductExtendedOrm {
-	private readonly base_orm: BaseOrmService<TDrizzleOrm>
+export class ProductExtendedOrm implements IOrmProductManagable {
+	private readonly orm: BaseOrmService
 
-	constructor(baseOrm: BaseOrmService<TDrizzleOrm>) {
-		this.base_orm = baseOrm
+	constructor(baseOrm: BaseOrmService) {
+		this.orm = baseOrm
 	}
 
 	async createProduct(
-		userID: string,
 		product: TInsertProduct
 	): Promise<TSelectProduct> {
 		try {
-			const result = await this.base_orm.driver.insert(table_products)
-									 .values({
-												 ...product,
-												 product_owner_id: userID
-											 })
+			const result = await this.orm.driver.insert(table_products)
+									 .values(
+										 product
+									 )
 									 .returning()
-			return this.base_orm.logger.logAndReturn(
+
+			return this.orm.logger.logAndReturn(
 				result[0],
 				'operation: create_product'
 			);
@@ -45,12 +45,12 @@ export class ProductExtendedOrm {
 		}
 	}
 
-	async deleteProductById(
+	async deleteProduct(
 		userID: string,
 		id: string
 	): Promise<boolean> {
 		try {
-			const result = await this.base_orm.driver.delete(table_products)
+			const result = await this.orm.driver.delete(table_products)
 									 .where(
 										 and(
 											 eq(
@@ -63,7 +63,7 @@ export class ProductExtendedOrm {
 											 )
 										 ))
 									 .returning()
-			this.base_orm.logger.log(JSON.stringify(result[0]))
+			this.orm.logger.log(JSON.stringify(result[0]))
 			return true
 		} catch (e) {
 			throw new OrmError(
@@ -74,27 +74,28 @@ export class ProductExtendedOrm {
 		}
 	}
 
-	async getProductById(
+	async getProduct(
 		userID: string,
 		id: string
 	): Promise<TSelectProduct | undefined> {
 		try {
-			const result = await this.base_orm.driver.query.table_products.findFirst({
-																						 where(columns) {
-																							 return and(
-																								 eq(
-																									 columns.product_owner_id,
-																									 userID
-																								 ),
-																								 eq(
-																									 columns.product_id,
-																									 id
-																								 )
-																							 )
-																						 }
-																					 })
+			const result = await this.orm.driver.query.table_products.findFirst(
+				{
+					where(columns) {
+						return and(
+							eq(
+								columns.product_owner_id,
+								userID
+							),
+							eq(
+								columns.product_id,
+								id
+							)
+						)
+					}
+				})
 
-			return this.base_orm.logger.logAndReturn(
+			return this.orm.logger.logAndReturn(
 				result,
 				'operation: get_product_by_id'
 			)
@@ -107,18 +108,19 @@ export class ProductExtendedOrm {
 		}
 	}
 
-	async getProductsByUserId(userId: string): Promise<TSelectProduct[]> {
+	async getProducts(userId: string): Promise<TSelectProduct[]> {
 		try {
-			const result = await this.base_orm.driver.query.table_products.findMany({
-																						where(columns) {
-																							return eq(
-																								columns.product_owner_id,
-																								userId
-																							)
-																						}
-																					})
+			const result = await this.orm.driver.query.table_products.findMany(
+				{
+					where(columns) {
+						return eq(
+							columns.product_owner_id,
+							userId
+						)
+					}
+				})
 
-			return this.base_orm.logger.logAndReturn(
+			return this.orm.logger.logAndReturn(
 				result,
 				'operation: get_products_by_user_id'
 			)
@@ -131,13 +133,13 @@ export class ProductExtendedOrm {
 		}
 	}
 
-	async updateProductById(
+	async updateProduct(
 		userID: string,
 		id: string,
 		productUpdates: TUpdatePage
 	): Promise<TSelectProduct> {
 		try {
-			const result = await this.base_orm.driver.update(table_products)
+			const result = await this.orm.driver.update(table_products)
 									 .set(productUpdates)
 									 .where(
 										 and(
@@ -152,7 +154,7 @@ export class ProductExtendedOrm {
 										 ))
 									 .returning()
 
-			return this.base_orm.logger.logAndReturn(
+			return this.orm.logger.logAndReturn(
 				result[0],
 				'operation: update_product_by_id'
 			)
