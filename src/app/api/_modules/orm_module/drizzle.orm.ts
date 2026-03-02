@@ -63,6 +63,10 @@ export class DrizzleOrmService
 		return this.instance
 	}
 
+	get driver() {
+		return this._driver
+	}
+
 }
 
 
